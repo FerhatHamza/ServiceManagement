@@ -1,62 +1,62 @@
-// ======================= BASE DE DONNÉES SIMULÉE (localStorage) =======================
-const DB_KEY = 'services_etat_db';
-
-function getDB() {
-    const raw = localStorage.getItem(DB_KEY);
-    if (!raw) {
-        const initial = {
-            users: [
-                { id: 'u1', name: 'Administrateur', email: 'admin@lab.com', password: 'admin123', role: 'admin', createdAt: '2025-01-10' },
-                { id: 'u2', name: 'Technicien Labo', email: 'lab@lab.com', password: 'lab123', role: 'lab', createdAt: '2025-02-15' },
-                { id: 'u3', name: 'Pharmacien Rx', email: 'rx@lab.com', password: 'rx123', role: 'rx', createdAt: '2025-03-01' },
-                { id: 'u4', name: 'Dr. Consultant', email: 'consultant@lab.com', password: 'consultant123', role: 'consultant', createdAt: '2025-03-20' },
-            ],
-            labTests: [
-                { id: 't1', name: 'Numération formule sanguine (NFS)', category: 'Hématologie', isActive: true, updatedAt: '2025-04-01' },
-                { id: 't2', name: 'Bilan lipidique', category: 'Biochimie', isActive: true, updatedAt: '2025-04-02' },
-                { id: 't3', name: 'Fonction hépatique', category: 'Biochimie', isActive: true, updatedAt: '2025-04-03' },
-                { id: 't4', name: 'Fonction rénale', category: 'Biochimie', isActive: false, updatedAt: '2025-04-04' },
-                { id: 't5', name: 'Bilan thyroïdien (TSH, T3, T4)', category: 'Endocrinologie', isActive: true, updatedAt: '2025-04-05' },
-                { id: 't6', name: 'HbA1c', category: 'Diabète', isActive: true, updatedAt: '2025-04-06' },
-                { id: 't7', name: 'Analyse d’urine', category: 'Général', isActive: false, updatedAt: '2025-04-07' },
-                { id: 't8', name: 'Vitamine D', category: 'Nutrition', isActive: true, updatedAt: '2025-04-08' },
-            ],
-            rxService: { id: 'rx1', name: 'Service Pharmacie', isWorking: true, updatedAt: '2025-04-10' },
-            activityLogs: [],
-        };
-        saveDB(initial);
-        return initial;
-    }
-    return JSON.parse(raw);
-}
-
-function saveDB(db) {
-    localStorage.setItem(DB_KEY, JSON.stringify(db));
-}
+// ======================= CONFIGURATION =======================
+const API_BASE = 'https://blue-firefly-9e2d.didcrist.workers.dev/api';
 
 // ======================= VARIABLES GLOBALES =======================
 let currentUser = null;
 let currentView = '';
 
+// ======================= FONCTIONS API =======================
+async function apiFetch(url, options = {}) {
+    try {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...(options.headers || {}),
+            },
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text || 'Erreur réseau');
+        }
+        return await res.json();
+    } catch (error) {
+        showToast(error.message, 'error');
+        throw error;
+    }
+}
+
+// Récupération des données pour le consultant (public)
+async function loadPublicData() {
+    try {
+        const [tests, rxStatus] = await Promise.all([
+            apiFetch(`${API_BASE}/tests`),
+            apiFetch(`${API_BASE}/rx-status`),
+        ]);
+        return { tests, rxStatus };
+    } catch {
+        return { tests: [], rxStatus: { isWorking: false } };
+    }
+}
+
 // ======================= AFFICHAGE PUBLIC (CONSULTANT) =======================
-function renderPublicConsultant() {
-    const db = getDB();
-    const activeTests = db.labTests.filter(t => t.isActive);
-    const inactiveTests = db.labTests.filter(t => !t.isActive);
-    const rx = db.rxService;
+async function renderPublicConsultant() {
+    const { tests, rxStatus } = await loadPublicData();
+    const activeTests = tests.filter(t => t.isActive);
+    const inactiveTests = tests.filter(t => !t.isActive);
 
     const container = document.getElementById('publicConsultantView');
     container.innerHTML = `
         <!-- Rx Status -->
-        <div class="card p-5 mb-6 ${rx.isWorking ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}">
+        <div class="card p-5 mb-6 ${rxStatus.isWorking ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}">
             <div class="flex items-center gap-4">
-                <span class="pulse-dot ${rx.isWorking ? 'active' : 'inactive'}"></span>
+                <span class="pulse-dot ${rxStatus.isWorking ? 'active' : 'inactive'}"></span>
                 <div>
-                    <p class="font-bold ${rx.isWorking ? 'text-emerald-700' : 'text-red-700'}">
-                        Service Pharmacie : ${rx.isWorking ? 'Opérationnel ✓' : 'Indisponible ✕'}
+                    <p class="font-bold ${rxStatus.isWorking ? 'text-emerald-700' : 'text-red-700'}">
+                        Service Pharmacie : ${rxStatus.isWorking ? 'Opérationnel ✓' : 'Indisponible ✕'}
                     </p>
-                    <p class="text-xs ${rx.isWorking ? 'text-emerald-600' : 'text-red-500'}">
-                        ${rx.isWorking ? 'Vous pouvez envoyer des ordonnances.' : 'Merci de ne pas envoyer de prescriptions actuellement.'}
+                    <p class="text-xs ${rxStatus.isWorking ? 'text-emerald-600' : 'text-red-500'}">
+                        ${rxStatus.isWorking ? 'Vous pouvez envoyer des ordonnances.' : 'Merci de ne pas envoyer de prescriptions actuellement.'}
                     </p>
                 </div>
             </div>
@@ -93,20 +93,17 @@ function renderPublicConsultant() {
 }
 
 // ======================= AUTHENTIFICATION =======================
-function login(email, password) {
-    const db = getDB();
-    const user = db.users.find(u => u.email === email && u.password === password);
-    if (!user) return null;
-    currentUser = { ...user };
-    db.activityLogs.push({
-        id: 'log' + Date.now(),
-        userId: user.id,
-        action: 'Connexion',
-        details: `${user.name} s'est connecté`,
-        createdAt: new Date().toISOString().split('T')[0]
-    });
-    saveDB(db);
-    return user;
+async function login(email, password) {
+    try {
+        const user = await apiFetch(`${API_BASE}/login`, {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+        });
+        currentUser = user;
+        return user;
+    } catch {
+        return null;
+    }
 }
 
 function logout() {
@@ -197,121 +194,140 @@ function switchView(viewName) {
     renderView(viewName);
 }
 
-// ======================= RENDU DES VUES =======================
-function renderView(viewName) {
-    const db = getDB();
+// ======================= RENDU DES VUES (avec appels API) =======================
+async function renderView(viewName) {
     switch (viewName) {
-        case 'adminDashboard': renderAdminDashboard(db); break;
-        case 'adminUsers': renderAdminUsers(db); break;
-        case 'adminServices': renderAdminServices(db); break;
-        case 'labTests': renderLabTests(db); break;
-        case 'rxStatus': renderRxStatus(db); break;
+        case 'adminDashboard': await renderAdminDashboard(); break;
+        case 'adminUsers': await renderAdminUsers(); break;
+        case 'adminServices': await renderAdminServices(); break;
+        case 'labTests': await renderLabTests(); break;
+        case 'rxStatus': await renderRxStatus(); break;
     }
 }
 
-function renderAdminDashboard(db) {
-    const totalUsers = db.users.length;
-    const totalTests = db.labTests.length;
-    const activeTests = db.labTests.filter(t => t.isActive).length;
-    const rxWorking = db.rxService.isWorking;
-    document.getElementById('viewAdminDashboard').innerHTML = `
-        <h2 class="text-2xl font-bold mb-6">Tableau de bord administrateur</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="card stat-card p-5" style="border-left-color:#0ea5e9"><p class="text-slate-500 text-xs">Utilisateurs</p><p class="text-3xl font-bold">${totalUsers}</p></div>
-            <div class="card stat-card p-5" style="border-left-color:#10b981"><p class="text-slate-500 text-xs">Tests actifs</p><p class="text-3xl font-bold">${activeTests}/${totalTests}</p></div>
-            <div class="card stat-card p-5" style="border-left-color:${rxWorking?'#10b981':'#ef4444'}"><p class="text-slate-500 text-xs">Pharmacie</p><p class="text-3xl font-bold ${rxWorking?'text-emerald-600':'text-red-500'}">${rxWorking?'Actif':'Inactif'}</p></div>
-            <div class="card stat-card p-5" style="border-left-color:#8b5cf6"><p class="text-slate-500 text-xs">Total services</p><p class="text-3xl font-bold">${totalTests+1}</p></div>
-        </div>
-    `;
-}
-
-function renderAdminUsers(db) {
-    const container = document.getElementById('viewAdminUsers');
-    container.innerHTML = `
-        <div class="flex justify-between mb-4"><h2 class="text-2xl font-bold">Utilisateurs</h2><button onclick="openAddUserModal()" class="px-5 py-2.5 bg-primary-500 text-white rounded-xl">+ Ajouter</button></div>
-        <div class="card overflow-hidden"><div class="responsive-table">
-        <table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-4 text-left">Nom</th><th class="p-4 text-left">Email</th><th class="p-4 text-left">Rôle</th><th class="p-4 text-right">Actions</th></tr></thead>
-        <tbody>${db.users.map(u=>`<tr class="border-b"><td class="p-4">${u.name}</td><td class="p-4">${u.email}</td><td class="p-4"><span class="badge-role bg-slate-200">${u.role}</span></td><td class="p-4 text-right"><button onclick="openEditUserModal('${u.id}')" class="text-primary-600 mr-3">Modifier</button><button onclick="deleteUser('${u.id}')" class="text-red-500">Supprimer</button></td></tr>`).join('')}</tbody></table>
-        </div></div>
-    `;
-}
-
-function renderAdminServices(db) {
-    const container = document.getElementById('viewAdminServices');
-    container.innerHTML = `
-        <div class="flex justify-between mb-4"><h2 class="text-2xl font-bold">Services</h2><button onclick="openAddTestModal()" class="px-5 py-2.5 bg-primary-500 text-white rounded-xl">+ Ajouter un test</button></div>
-        <div class="card overflow-hidden"><div class="responsive-table">
-        <table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-4 text-left">Test</th><th class="p-4 text-left">Catégorie</th><th class="p-4 text-left">Statut</th><th class="p-4 text-right">Actions</th></tr></thead>
-        <tbody>${db.labTests.map(t=>`<tr class="border-b"><td class="p-4">${t.name}</td><td class="p-4">${t.category}</td><td class="p-4"><span class="${t.isActive?'text-emerald-600 bg-emerald-50':'text-red-500 bg-red-50'} px-2 py-1 rounded-full text-xs">${t.isActive?'Actif':'Inactif'}</span></td><td class="p-4 text-right"><button onclick="toggleLabTest('${t.id}', ${!t.isActive})" class="text-primary-600 mr-3">${t.isActive?'Désactiver':'Activer'}</button><button onclick="deleteTest('${t.id}')" class="text-red-500">Supprimer</button></td></tr>`).join('')}</tbody></table>
-        </div></div>
-    `;
-}
-
-function renderLabTests(db) {
-    const container = document.getElementById('viewLabTests');
-    container.innerHTML = `
-        <h2 class="text-2xl font-bold mb-6">Gestion des tests de laboratoire</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            ${db.labTests.map(t=>`
-                <div class="card p-5 ${t.isActive?'border-l-4 border-l-emerald-400':'border-l-4 border-l-red-300'}">
-                    <div class="flex justify-between mb-2"><h4 class="font-semibold">${t.name}</h4>
-                    <label class="toggle-switch"><input type="checkbox" ${t.isActive?'checked':''} onchange="toggleLabTest('${t.id}', this.checked)"><span class="toggle-slider"></span></label></div>
-                    <p class="text-xs text-slate-400">${t.category}</p>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function renderRxStatus(db) {
-    const rx = db.rxService;
-    document.getElementById('viewRxStatus').innerHTML = `
-        <h2 class="text-2xl font-bold mb-6">État du service Pharmacie</h2>
-        <div class="card p-8 max-w-md mx-auto text-center">
-            <div class="w-20 h-20 ${rx.isWorking?'bg-emerald-100':'bg-red-100'} rounded-full flex items-center justify-center mx-auto mb-5">
-                <span class="pulse-dot ${rx.isWorking?'active':'inactive'}" style="width:24px;height:24px;"></span>
+async function renderAdminDashboard() {
+    try {
+        const [users, tests, rxStatus] = await Promise.all([
+            apiFetch(`${API_BASE}/users`),
+            apiFetch(`${API_BASE}/tests`),
+            apiFetch(`${API_BASE}/rx-status`),
+        ]);
+        const totalUsers = users.length;
+        const totalTests = tests.length;
+        const activeTests = tests.filter(t => t.isActive).length;
+        const rxWorking = rxStatus.isWorking;
+        document.getElementById('viewAdminDashboard').innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Tableau de bord administrateur</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="card stat-card p-5" style="border-left-color:#0ea5e9"><p class="text-slate-500 text-xs">Utilisateurs</p><p class="text-3xl font-bold">${totalUsers}</p></div>
+                <div class="card stat-card p-5" style="border-left-color:#10b981"><p class="text-slate-500 text-xs">Tests actifs</p><p class="text-3xl font-bold">${activeTests}/${totalTests}</p></div>
+                <div class="card stat-card p-5" style="border-left-color:${rxWorking?'#10b981':'#ef4444'}"><p class="text-slate-500 text-xs">Pharmacie</p><p class="text-3xl font-bold ${rxWorking?'text-emerald-600':'text-red-500'}">${rxWorking?'Actif':'Inactif'}</p></div>
+                <div class="card stat-card p-5" style="border-left-color:#8b5cf6"><p class="text-slate-500 text-xs">Total services</p><p class="text-3xl font-bold">${totalTests+1}</p></div>
             </div>
-            <h3 class="text-xl font-bold mb-2">${rx.isWorking?'Service opérationnel':'Service indisponible'}</h3>
-            <label class="toggle-switch mx-auto" style="width:64px;height:34px;">
-                <input type="checkbox" ${rx.isWorking?'checked':''} onchange="toggleRxService(this.checked)">
-                <span class="toggle-slider" style="border-radius:34px;"></span>
-            </label>
-            <p class="text-xs text-slate-400 mt-4">Dernière mise à jour : ${rx.updatedAt}</p>
-        </div>
-    `;
+        `;
+    } catch { /* gestion d'erreur silencieuse */ }
 }
 
-// ======================= ACTIONS =======================
-function toggleLabTest(testId, isActive) {
-    const db = getDB();
-    const test = db.labTests.find(t => t.id === testId);
-    if (!test) return;
-    test.isActive = isActive;
-    test.updatedAt = new Date().toISOString().split('T')[0];
-    saveDB(db);
-    showToast(`Test "${test.name}" ${isActive ? 'activé' : 'désactivé'}`, isActive ? 'success' : 'warning');
-    renderView(currentView);
-    renderPublicConsultant();
+async function renderAdminUsers() {
+    try {
+        const users = await apiFetch(`${API_BASE}/users`);
+        const container = document.getElementById('viewAdminUsers');
+        container.innerHTML = `
+            <div class="flex justify-between mb-4"><h2 class="text-2xl font-bold">Utilisateurs</h2><button onclick="openAddUserModal()" class="px-5 py-2.5 bg-primary-500 text-white rounded-xl">+ Ajouter</button></div>
+            <div class="card overflow-hidden"><div class="responsive-table">
+            <table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-4 text-left">Nom</th><th class="p-4 text-left">Email</th><th class="p-4 text-left">Rôle</th><th class="p-4 text-right">Actions</th></tr></thead>
+            <tbody>${users.map(u=>`<tr class="border-b"><td class="p-4">${u.name}</td><td class="p-4">${u.email}</td><td class="p-4"><span class="badge-role bg-slate-200">${u.role}</span></td><td class="p-4 text-right"><button onclick="openEditUserModal('${u.id}')" class="text-primary-600 mr-3">Modifier</button><button onclick="deleteUser('${u.id}')" class="text-red-500">Supprimer</button></td></tr>`).join('')}</tbody></table>
+            </div></div>
+        `;
+    } catch { }
 }
 
-function toggleRxService(isWorking) {
-    const db = getDB();
-    db.rxService.isWorking = isWorking;
-    db.rxService.updatedAt = new Date().toISOString().split('T')[0];
-    saveDB(db);
-    showToast(`Service Pharmacie ${isWorking ? 'activé' : 'désactivé'}`, isWorking ? 'success' : 'error');
-    renderView(currentView);
-    renderPublicConsultant();
+async function renderAdminServices() {
+    try {
+        const tests = await apiFetch(`${API_BASE}/tests`);
+        const container = document.getElementById('viewAdminServices');
+        container.innerHTML = `
+            <div class="flex justify-between mb-4"><h2 class="text-2xl font-bold">Services</h2><button onclick="openAddTestModal()" class="px-5 py-2.5 bg-primary-500 text-white rounded-xl">+ Ajouter un test</button></div>
+            <div class="card overflow-hidden"><div class="responsive-table">
+            <table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-4 text-left">Test</th><th class="p-4 text-left">Catégorie</th><th class="p-4 text-left">Statut</th><th class="p-4 text-right">Actions</th></tr></thead>
+            <tbody>${tests.map(t=>`<tr class="border-b"><td class="p-4">${t.name}</td><td class="p-4">${t.category}</td><td class="p-4"><span class="${t.isActive?'text-emerald-600 bg-emerald-50':'text-red-500 bg-red-50'} px-2 py-1 rounded-full text-xs">${t.isActive?'Actif':'Inactif'}</span></td><td class="p-4 text-right"><button onclick="toggleLabTest('${t.id}', ${!t.isActive})" class="text-primary-600 mr-3">${t.isActive?'Désactiver':'Activer'}</button><button onclick="deleteTest('${t.id}')" class="text-red-500">Supprimer</button></td></tr>`).join('')}</tbody></table>
+            </div></div>
+        `;
+    } catch { }
 }
 
-function deleteTest(testId) {
+async function renderLabTests() {
+    try {
+        const tests = await apiFetch(`${API_BASE}/tests`);
+        const container = document.getElementById('viewLabTests');
+        container.innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">Gestion des tests de laboratoire</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${tests.map(t=>`
+                    <div class="card p-5 ${t.isActive?'border-l-4 border-l-emerald-400':'border-l-4 border-l-red-300'}">
+                        <div class="flex justify-between mb-2"><h4 class="font-semibold">${t.name}</h4>
+                        <label class="toggle-switch"><input type="checkbox" ${t.isActive?'checked':''} onchange="toggleLabTest('${t.id}', this.checked)"><span class="toggle-slider"></span></label></div>
+                        <p class="text-xs text-slate-400">${t.category}</p>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch { }
+}
+
+async function renderRxStatus() {
+    try {
+        const rx = await apiFetch(`${API_BASE}/rx-status`);
+        document.getElementById('viewRxStatus').innerHTML = `
+            <h2 class="text-2xl font-bold mb-6">État du service Pharmacie</h2>
+            <div class="card p-8 max-w-md mx-auto text-center">
+                <div class="w-20 h-20 ${rx.isWorking?'bg-emerald-100':'bg-red-100'} rounded-full flex items-center justify-center mx-auto mb-5">
+                    <span class="pulse-dot ${rx.isWorking?'active':'inactive'}" style="width:24px;height:24px;"></span>
+                </div>
+                <h3 class="text-xl font-bold mb-2">${rx.isWorking?'Service opérationnel':'Service indisponible'}</h3>
+                <label class="toggle-switch mx-auto" style="width:64px;height:34px;">
+                    <input type="checkbox" ${rx.isWorking?'checked':''} onchange="toggleRxService(this.checked)">
+                    <span class="toggle-slider" style="border-radius:34px;"></span>
+                </label>
+                <p class="text-xs text-slate-400 mt-4">Dernière mise à jour : ${rx.updatedAt}</p>
+            </div>
+        `;
+    } catch { }
+}
+
+// ======================= ACTIONS (avec API) =======================
+async function toggleLabTest(testId, isActive) {
+    try {
+        await apiFetch(`${API_BASE}/tests/${testId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ isActive }),
+        });
+        showToast(`Test ${isActive ? 'activé' : 'désactivé'}`, isActive ? 'success' : 'warning');
+        renderView(currentView);
+        renderPublicConsultant();
+    } catch { }
+}
+
+async function toggleRxService(isWorking) {
+    try {
+        await apiFetch(`${API_BASE}/rx-status`, {
+            method: 'PUT',
+            body: JSON.stringify({ isWorking }),
+        });
+        showToast(`Service Pharmacie ${isWorking ? 'activé' : 'désactivé'}`, isWorking ? 'success' : 'error');
+        renderView(currentView);
+        renderPublicConsultant();
+    } catch { }
+}
+
+async function deleteTest(testId) {
     if (!confirm('Supprimer ce test ?')) return;
-    const db = getDB();
-    db.labTests = db.labTests.filter(t => t.id !== testId);
-    saveDB(db);
-    showToast('Test supprimé', 'info');
-    renderView('adminServices');
-    renderPublicConsultant();
+    try {
+        await apiFetch(`${API_BASE}/tests/${testId}`, { method: 'DELETE' });
+        showToast('Test supprimé', 'info');
+        renderView('adminServices');
+        renderPublicConsultant();
+    } catch { }
 }
 
 function openAddTestModal() {
@@ -319,23 +335,20 @@ function openAddTestModal() {
         <div><label class="block text-sm font-medium mb-1">Nom du test</label><input id="newTestName" class="w-full px-4 py-2.5 border rounded-xl"></div>
         <div class="mt-3"><label class="block text-sm font-medium mb-1">Catégorie</label><input id="newTestCategory" class="w-full px-4 py-2.5 border rounded-xl"></div>
     `;
-    openModal('Ajouter un test', body, () => {
+    openModal('Ajouter un test', body, async () => {
         const name = document.getElementById('newTestName').value.trim();
         const category = document.getElementById('newTestCategory').value.trim();
         if (!name || !category) return showToast('Veuillez remplir tous les champs', 'error');
-        const db = getDB();
-        db.labTests.push({
-            id: 't' + Date.now(),
-            name,
-            category,
-            isActive: true,
-            updatedAt: new Date().toISOString().split('T')[0]
-        });
-        saveDB(db);
-        closeModal();
-        showToast('Test ajouté', 'success');
-        renderView('adminServices');
-        renderPublicConsultant();
+        try {
+            await apiFetch(`${API_BASE}/tests`, {
+                method: 'POST',
+                body: JSON.stringify({ name, category }),
+            });
+            closeModal();
+            showToast('Test ajouté', 'success');
+            renderView('adminServices');
+            renderPublicConsultant();
+        } catch { }
     });
 }
 
@@ -346,61 +359,72 @@ function openAddUserModal() {
         <div class="mt-3"><label>Mot de passe</label><input id="newUserPassword" type="text" class="w-full px-4 py-2.5 border rounded-xl"></div>
         <div class="mt-3"><label>Rôle</label><select id="newUserRole" class="w-full px-4 py-2.5 border rounded-xl"><option value="admin">Administrateur</option><option value="lab">Laboratoire</option><option value="rx">Pharmacie</option></select></div>
     `;
-    openModal('Ajouter un utilisateur', body, () => {
+    openModal('Ajouter un utilisateur', body, async () => {
         const name = document.getElementById('newUserName').value.trim();
         const email = document.getElementById('newUserEmail').value.trim();
         const password = document.getElementById('newUserPassword').value.trim();
         const role = document.getElementById('newUserRole').value;
         if (!name || !email || !password) return showToast('Champs requis', 'error');
-        const db = getDB();
-        if (db.users.find(u => u.email === email)) return showToast('Email déjà utilisé', 'error');
-        db.users.push({ id: 'u' + Date.now(), name, email, password, role, createdAt: new Date().toISOString().split('T')[0] });
-        saveDB(db);
-        closeModal();
-        showToast('Utilisateur créé', 'success');
-        renderView('adminUsers');
+        try {
+            await apiFetch(`${API_BASE}/users`, {
+                method: 'POST',
+                body: JSON.stringify({ name, email, password, role }),
+            });
+            closeModal();
+            showToast('Utilisateur créé', 'success');
+            renderView('adminUsers');
+        } catch { }
     });
 }
 
-function openEditUserModal(userId) {
-    const db = getDB();
-    const user = db.users.find(u => u.id === userId);
-    if (!user) return;
-    const body = `
-        <div><label>Nom</label><input id="editUserName" value="${user.name}" class="w-full px-4 py-2.5 border rounded-xl"></div>
-        <div class="mt-3"><label>Email</label><input id="editUserEmail" value="${user.email}" class="w-full px-4 py-2.5 border rounded-xl"></div>
-        <div class="mt-3"><label>Mot de passe</label><input id="editUserPassword" value="${user.password}" class="w-full px-4 py-2.5 border rounded-xl"></div>
-        <div class="mt-3"><label>Rôle</label><select id="editUserRole" class="w-full px-4 py-2.5 border rounded-xl">
-            <option value="admin" ${user.role==='admin'?'selected':''}>Administrateur</option>
-            <option value="lab" ${user.role==='lab'?'selected':''}>Laboratoire</option>
-            <option value="rx" ${user.role==='rx'?'selected':''}>Pharmacie</option>
-        </select></div>
-    `;
-    openModal('Modifier utilisateur', body, () => {
-        const name = document.getElementById('editUserName').value.trim();
-        const email = document.getElementById('editUserEmail').value.trim();
-        const password = document.getElementById('editUserPassword').value.trim();
-        const role = document.getElementById('editUserRole').value;
-        if (!name || !email || !password) return showToast('Champs requis', 'error');
-        const conflict = db.users.find(u => u.email === email && u.id !== userId);
-        if (conflict) return showToast('Email déjà utilisé', 'error');
-        user.name = name; user.email = email; user.password = password; user.role = role;
-        saveDB(db);
-        closeModal();
-        showToast('Utilisateur mis à jour', 'success');
-        if (currentUser.id === userId) { currentUser = {...user}; updateSidebarInfo(); }
-        renderView('adminUsers');
-    });
+async function openEditUserModal(userId) {
+    try {
+        const users = await apiFetch(`${API_BASE}/users`);
+        const user = users.find(u => u.id === userId);
+        if (!user) return;
+        const body = `
+            <div><label>Nom</label><input id="editUserName" value="${user.name}" class="w-full px-4 py-2.5 border rounded-xl"></div>
+            <div class="mt-3"><label>Email</label><input id="editUserEmail" value="${user.email}" class="w-full px-4 py-2.5 border rounded-xl"></div>
+            <div class="mt-3"><label>Mot de passe</label><input id="editUserPassword" value="${user.password}" class="w-full px-4 py-2.5 border rounded-xl"></div>
+            <div class="mt-3"><label>Rôle</label><select id="editUserRole" class="w-full px-4 py-2.5 border rounded-xl">
+                <option value="admin" ${user.role==='admin'?'selected':''}>Administrateur</option>
+                <option value="lab" ${user.role==='lab'?'selected':''}>Laboratoire</option>
+                <option value="rx" ${user.role==='rx'?'selected':''}>Pharmacie</option>
+            </select></div>
+        `;
+        openModal('Modifier utilisateur', body, async () => {
+            const name = document.getElementById('editUserName').value.trim();
+            const email = document.getElementById('editUserEmail').value.trim();
+            const password = document.getElementById('editUserPassword').value.trim();
+            const role = document.getElementById('editUserRole').value;
+            if (!name || !email || !password) return showToast('Champs requis', 'error');
+            try {
+                await apiFetch(`${API_BASE}/users/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ name, email, password, role }),
+                });
+                closeModal();
+                showToast('Utilisateur mis à jour', 'success');
+                if (currentUser.id === userId) {
+                    currentUser.name = name;
+                    currentUser.email = email;
+                    currentUser.role = role;
+                    updateSidebarInfo();
+                }
+                renderView('adminUsers');
+            } catch { }
+        });
+    } catch { }
 }
 
-function deleteUser(userId) {
+async function deleteUser(userId) {
     if (!confirm('Supprimer cet utilisateur ?')) return;
-    const db = getDB();
     if (userId === currentUser.id) return showToast('Vous ne pouvez pas supprimer votre propre compte', 'error');
-    db.users = db.users.filter(u => u.id !== userId);
-    saveDB(db);
-    showToast('Utilisateur supprimé', 'info');
-    renderView('adminUsers');
+    try {
+        await apiFetch(`${API_BASE}/users/${userId}`, { method: 'DELETE' });
+        showToast('Utilisateur supprimé', 'info');
+        renderView('adminUsers');
+    } catch { }
 }
 
 // ======================= UI HELPERS =======================
@@ -439,12 +463,12 @@ function closeModal() {
 }
 
 // ======================= INITIALISATION =======================
-document.getElementById('loginForm').addEventListener('submit', function(e) {
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
-    const user = login(email, password);
-    if (!user) return showToast('Email ou mot de passe incorrect', 'error');
+    const user = await login(email, password);
+    if (!user) return;
     showApp();
     updateSidebarInfo();
     switchView(user.role === 'admin' ? 'adminDashboard' : user.role === 'lab' ? 'labTests' : 'rxStatus');
@@ -465,5 +489,5 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeModal();
 });
 
-// Rendu initial de la page publique
+// Page publique au chargement
 renderPublicConsultant();
