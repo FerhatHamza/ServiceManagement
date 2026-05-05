@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fr" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LabPlatform — Multi-Role Service Management</title>
+    <title>Services Etat – Suivi des services</title>
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com">
-    </script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -42,1042 +41,134 @@
     <!-- Tajawal Font -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --sidebar-width: 260px;
-        }
-        * {
-            font-family: 'Tajawal', sans-serif;
-        }
-        body {
-            background-color: #f1f5f9;
-            min-height: 100vh;
-        }
-        .sidebar {
-            width: var(--sidebar-width);
-            background: #0f172a;
-            min-height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 40;
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-        }
-        .sidebar-mobile-hidden {
-            transform: translateX(-100%);
-        }
-        @media (min-width: 1024px) {
-            .sidebar-mobile-hidden {
-                transform: translateX(0);
-            }
-            .main-content {
-                margin-left: var(--sidebar-width);
-            }
-        }
-        .main-content {
-            transition: margin-left 0.3s ease;
-            min-height: 100vh;
-        }
-        .card {
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-            transition: all 0.2s ease;
-        }
-        .card:hover {
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04);
-        }
-        .stat-card {
-            border-left: 4px solid;
-            border-radius: 0.75rem;
-            transition: transform 0.2s ease;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-        }
-        .toggle-switch {
-            position: relative;
-            width: 52px;
-            height: 28px;
-            display: inline-block;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #cbd5e1;
-            border-radius: 28px;
-            transition: all 0.3s ease;
-        }
-        .toggle-slider:before {
-            content: "";
-            position: absolute;
-            height: 22px;
-            width: 22px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-        input:checked+.toggle-slider {
-            background-color: #10b981;
-        }
-        input:checked+.toggle-slider:before {
-            transform: translateX(24px);
-        }
-        .modal-overlay {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-        }
-        .pulse-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-        .pulse-dot.active {
-            background-color: #10b981;
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-        }
-        .pulse-dot.inactive {
-            background-color: #ef4444;
-            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-        }
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-            }
-        }
-        .toast {
-            animation: slideInUp 0.4s ease, fadeOut 0.4s ease 2.6s forwards;
-        }
-        @keyframes slideInUp {
-            from {
-                transform: translateY(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-        }
-        .nav-item {
-            transition: all 0.2s ease;
-            border-radius: 0.5rem;
-            margin: 0.2rem 0.5rem;
-            cursor: pointer;
-        }
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-        .nav-item.active {
-            background: rgba(14, 165, 233, 0.25);
-            border-left: 3px solid #0ea5e9;
-            font-weight: 600;
-        }
-        .badge-role {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-        }
-        @media (max-width: 768px) {
-            .responsive-table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-            .stat-card {
-                border-left: none;
-                border-top: 4px solid;
-            }
-        }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-slate-100 text-slate-800">
+<body class="bg-slate-100 text-slate-800 font-tajawal">
 
-    <!-- ==================== LOGIN SCREEN ==================== -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 p-4">
-        <div class="card w-full max-w-md p-8 rounded-2xl shadow-2xl">
+    <!-- ========== PUBLIC CONSULTANT PAGE (DEFAULT) ========== -->
+    <div id="publicPage" class="min-h-screen p-4 md:p-8 bg-gradient-to-br from-slate-50 to-slate-100">
+        <div class="max-w-6xl mx-auto">
+            <header class="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-primary-500 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-800">Services Etat</h1>
+                        <p class="text-slate-500 text-sm">État des services en temps réel</p>
+                    </div>
+                </div>
+                <button id="showLoginBtn" class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold transition-all shadow-md shadow-primary-500/20 active:scale-95">
+                    🔐 Accès Employé
+                </button>
+            </header>
+
+            <div id="publicConsultantView">
+                <!-- Rempli dynamiquement par JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== LOGIN SCREEN (HIDDEN) ========== -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 p-4 hidden">
+        <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl">
             <div class="text-center mb-8">
                 <div class="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary-500/30">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                     </svg>
                 </div>
-                <h1 class="text-2xl font-bold text-slate-800">LabPlatform</h1>
-                <p class="text-slate-500 text-sm mt-1">Sign in to your account</p>
+                <h1 class="text-2xl font-bold text-slate-800">Services Etat</h1>
+                <p class="text-slate-500 text-sm mt-1">Connexion employé</p>
             </div>
             <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                    <input type="email" id="loginEmail" required
-                    class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition-all text-sm"
-                    placeholder="Enter your email">
+                    <input type="email" id="loginEmail" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-400 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                    <input type="password" id="loginPassword" required
-                    class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition-all text-sm"
-                    placeholder="Enter your password">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Mot de passe</label>
+                    <input type="password" id="loginPassword" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-400 outline-none">
                 </div>
-                <button type="submit"
-                class="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98]">
-                Sign In
-            </button>
-        </form>
-        <div class="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
-            <p class="text-xs text-slate-500 font-medium mb-2">Demo Credentials:</p>
-            <div class="grid grid-cols-2 gap-2 text-xs text-slate-600">
-                <div class="bg-white p-2 rounded-lg"><strong>Admin:</strong> admin@lab.com</div>
-                <div class="bg-white p-2 rounded-lg"><strong>Pass:</strong> admin123</div>
-                <div class="bg-white p-2 rounded-lg"><strong>Lab:</strong> lab@lab.com</div>
-                <div class="bg-white p-2 rounded-lg"><strong>Pass:</strong> lab123</div>
-                <div class="bg-white p-2 rounded-lg"><strong>Rx:</strong> rx@lab.com</div>
-                <div class="bg-white p-2 rounded-lg"><strong>Pass:</strong> rx123</div>
-                <div class="bg-white p-2 rounded-lg col-span-2"><strong>Consultant:</strong> consultant@lab.com / consultant123</div>
+                <button type="submit" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 rounded-xl transition-all shadow-lg">
+                    Se connecter
+                </button>
+            </form>
+            <button id="backToPublicBtn" class="mt-4 text-sm text-primary-600 hover:text-primary-800 w-full text-center">← Retour à l'état des services</button>
+            <div class="mt-6 p-4 bg-slate-50 rounded-xl">
+                <p class="text-xs font-medium text-slate-500 mb-2">Identifiants de démonstration :</p>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>admin@lab.com / admin123</div>
+                    <div>lab@lab.com / lab123</div>
+                    <div>rx@lab.com / rx123</div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- ==================== MAIN APP (HIDDEN UNTIL LOGIN) ==================== -->
-<div id="appContainer" class="hidden">
-
-    <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar sidebar-mobile-hidden flex flex-col z-50">
-        <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-700/50">
-            <div class="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30 flex-shrink-0">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                </svg>
-            </div>
-            <div>
-                <h2 class="text-white font-bold text-sm">LabPlatform</h2>
-                <p id="sidebarRole" class="text-slate-400 text-xs">Role</p>
-            </div>
-        </div>
-        <nav class="flex-1 py-4 space-y-1" id="sidebarNav">
-            <!-- Dynamically filled -->
-        </nav>
-        <div class="p-4 border-t border-slate-700/50">
-            <div class="flex items-center gap-3 text-slate-300 text-sm">
-                <div class="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center text-white font-bold text-xs" id="userAvatar">U</div>
+    <!-- ========== APPLICATION EMPLOYÉE (HIDDEN) ========== -->
+    <div id="appContainer" class="hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar sidebar-mobile-hidden">
+            <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-700/50">
+                <div class="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                </div>
                 <div>
-                    <p id="sidebarUserName" class="font-medium text-white text-sm">User</p>
-                    <p id="sidebarUserEmail" class="text-slate-400 text-xs">email</p>
+                    <h2 class="text-white font-bold text-sm">Services Etat</h2>
+                    <p id="sidebarRole" class="text-slate-400 text-xs">Rôle</p>
                 </div>
             </div>
-            <button id="logoutBtn" class="mt-3 w-full text-left text-slate-400 hover:text-red-400 text-xs flex items-center gap-2 transition-colors py-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1" /></svg>
-                Sign Out
-            </button>
+            <nav id="sidebarNav" class="flex-1 py-4 space-y-1"></nav>
+            <div class="p-4 border-t border-slate-700/50">
+                <div class="flex items-center gap-3 text-slate-300 text-sm">
+                    <div class="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center text-white font-bold text-xs" id="userAvatar">U</div>
+                    <div>
+                        <p id="sidebarUserName" class="font-medium text-white text-sm">Utilisateur</p>
+                        <p id="sidebarUserEmail" class="text-slate-400 text-xs">email</p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="mt-3 w-full text-left text-slate-400 hover:text-red-400 text-xs flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1" /></svg>
+                    Déconnexion
+                </button>
+            </div>
+        </aside>
+
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+        <div class="main-content p-4 md:p-6 lg:p-8">
+            <div class="lg:hidden flex items-center justify-between mb-6">
+                <button onclick="toggleSidebar()" class="p-2 rounded-lg bg-white shadow-sm">
+                    <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+                <h1 class="text-lg font-bold text-slate-800" id="pageTitleMobile">Tableau de bord</h1>
+                <div class="w-10"></div>
+            </div>
+
+            <!-- Views -->
+            <div id="viewAdminDashboard" class="view hidden"></div>
+            <div id="viewAdminUsers" class="view hidden"></div>
+            <div id="viewAdminServices" class="view hidden"></div>
+            <div id="viewLabTests" class="view hidden"></div>
+            <div id="viewRxStatus" class="view hidden"></div>
         </div>
-    </aside>
-
-    <!-- Mobile Overlay -->
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
-
-    <!-- Main Content Area -->
-    <div class="main-content p-4 md:p-6 lg:p-8">
-        <!-- Top Bar Mobile -->
-        <div class="lg:hidden flex items-center justify-between mb-6">
-            <button onclick="toggleSidebar()" class="p-2 rounded-lg bg-white shadow-sm hover:bg-slate-50">
-                <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            </button>
-            <h1 class="text-lg font-bold text-slate-800" id="pageTitleMobile">Dashboard</h1>
-            <div class="w-10"></div>
-        </div>
-
-        <!-- View Containers -->
-        <div id="viewAdminDashboard" class="view hidden"></div>
-        <div id="viewAdminUsers" class="view hidden"></div>
-        <div id="viewAdminServices" class="view hidden"></div>
-        <div id="viewLabTests" class="view hidden"></div>
-        <div id="viewRxStatus" class="view hidden"></div>
-        <div id="viewConsultant" class="view hidden"></div>
     </div>
-</div>
 
-<!-- ==================== MODAL ==================== -->
-<div id="modalOverlay" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
-    <div id="modalContent" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
-        <!-- Dynamic modal content -->
+    <!-- Modal overlay -->
+    <div id="modalOverlay" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div id="modalContent" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto"></div>
     </div>
-</div>
 
-<!-- ==================== TOAST CONTAINER ==================== -->
-<div id="toastContainer" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3"></div>
+    <!-- Toast container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3"></div>
 
-<script>
-    // ==================== DATA LAYER (Simulates D1 Database via localStorage) ====================
-    const DB_KEY = 'labplatform_db';
-
-    function getDB() {
-        const raw = localStorage.getItem(DB_KEY);
-        if (!raw) {
-            // Seed initial data
-            const initial = {
-                users: [
-                    { id: 'u1', name: 'Admin User', email: 'admin@lab.com', password: 'admin123', role: 'admin',
-                        createdAt: '2025-01-10' },
-                    { id: 'u2', name: 'Lab Technician', email: 'lab@lab.com', password: 'lab123', role: 'lab',
-                        createdAt: '2025-02-15' },
-                    { id: 'u3', name: 'Rx Pharmacist', email: 'rx@lab.com', password: 'rx123', role: 'rx',
-                        createdAt: '2025-03-01' },
-                    { id: 'u4', name: 'Dr. Consultant', email: 'consultant@lab.com', password: 'consultant123',
-                        role: 'consultant', createdAt: '2025-03-20' },
-                ],
-                labTests: [
-                    { id: 't1', name: 'Complete Blood Count (CBC)', category: 'Hematology', isActive: true,
-                        updatedAt: '2025-04-01' },
-                    { id: 't2', name: 'Lipid Profile', category: 'Biochemistry', isActive: true,
-                    updatedAt: '2025-04-02' },
-                    { id: 't3', name: 'Liver Function Test', category: 'Biochemistry', isActive: true,
-                        updatedAt: '2025-04-03' },
-                    { id: 't4', name: 'Kidney Function Test', category: 'Biochemistry', isActive: false,
-                        updatedAt: '2025-04-04' },
-                    { id: 't5', name: 'Thyroid Panel (TSH, T3, T4)', category: 'Endocrinology', isActive: true,
-                        updatedAt: '2025-04-05' },
-                    { id: 't6', name: 'HbA1c', category: 'Diabetes', isActive: true, updatedAt: '2025-04-06' },
-                    { id: 't7', name: 'Urinalysis', category: 'General', isActive: false, updatedAt: '2025-04-07' },
-                    { id: 't8', name: 'Vitamin D Level', category: 'Nutrition', isActive: true,
-                    updatedAt: '2025-04-08' },
-                ],
-                rxService: { id: 'rx1', name: 'Pharmacy Service', isWorking: true, updatedAt: '2025-04-10' },
-                activityLogs: [
-                    { id: 'log1', userId: 'u1', action: 'System initialized', details: 'Platform setup complete',
-                        createdAt: '2025-01-10' },
-                ],
-            };
-            saveDB(initial);
-            return initial;
-        }
-        return JSON.parse(raw);
-    }
-
-    function saveDB(db) {
-        localStorage.setItem(DB_KEY, JSON.stringify(db));
-    }
-
-    let currentUser = null;
-    let currentView = '';
-
-    // ==================== AUTH ====================
-    function login(email, password) {
-        const db = getDB();
-        const user = db.users.find(u => u.email === email && u.password === password);
-        if (!user) return null;
-        currentUser = { ...user };
-        // Add login activity
-        db.activityLogs.push({
-            id: 'log' + Date.now(),
-            userId: user.id,
-            action: 'User logged in',
-            details: `${user.name} signed in`,
-            createdAt: new Date().toISOString().split('T')[0]
-        });
-        saveDB(db);
-        return user;
-    }
-
-    function logout() {
-        currentUser = null;
-        currentView = '';
-        document.getElementById('appContainer').classList.add('hidden');
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('loginForm').reset();
-        // Close sidebar on mobile
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.add('sidebar-mobile-hidden');
-        document.getElementById('sidebarOverlay').classList.add('hidden');
-    }
-
-    // ==================== UI HELPERS ====================
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toastContainer');
-        const colors = {
-            success: 'bg-emerald-500',
-            error: 'bg-red-500',
-            info: 'bg-primary-500',
-            warning: 'bg-amber-500',
-        };
-        const icons = {
-            success: '✓',
-            error: '✕',
-            info: 'ℹ',
-            warning: '⚠',
-        };
-        const toast = document.createElement('div');
-        toast.className =
-            `toast ${colors[type] || colors.info} text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium`;
-        toast.innerHTML = `<span class="text-lg">${icons[type] || icons.info}</span> ${message}`;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const isHidden = sidebar.classList.contains('sidebar-mobile-hidden');
-        if (isHidden) {
-            sidebar.classList.remove('sidebar-mobile-hidden');
-            overlay.classList.remove('hidden');
-        } else {
-            sidebar.classList.add('sidebar-mobile-hidden');
-            overlay.classList.add('hidden');
-        }
-    }
-
-    function openModal(title, bodyHTML, onSave) {
-        const overlay = document.getElementById('modalOverlay');
-        const content = document.getElementById('modalContent');
-        content.innerHTML = `
-        <div class="flex items-center justify-between mb-5">
-        <h3 class="text-lg font-bold text-slate-800">${title}</h3>
-        <button onclick="closeModal()" class="p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
-        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-        </div>
-        <div>${bodyHTML}</div>
-        <div class="flex gap-3 mt-6 justify-end">
-        <button onclick="closeModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium">Cancel</button>
-        <button id="modalSaveBtn" class="px-5 py-2.5 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-semibold text-sm transition-all shadow-md shadow-primary-500/20 active:scale-[0.97]">Save</button>
-        </div>
-        `;
-        document.getElementById('modalSaveBtn').addEventListener('click', () => {
-            if (onSave) onSave();
-        });
-        overlay.classList.remove('hidden');
-    }
-
-    function closeModal() {
-        document.getElementById('modalOverlay').classList.add('hidden');
-    }
-
-    function switchView(viewName) {
-        currentView = viewName;
-        // Hide all views
-        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-        // Show target view
-        const viewMap = {
-            'adminDashboard': 'viewAdminDashboard',
-            'adminUsers': 'viewAdminUsers',
-            'adminServices': 'viewAdminServices',
-            'labTests': 'viewLabTests',
-            'rxStatus': 'viewRxStatus',
-            'consultant': 'viewConsultant',
-        };
-        const targetId = viewMap[viewName];
-        if (targetId) document.getElementById(targetId).classList.remove('hidden');
-        // Update nav active
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        const activeNav = document.querySelector(`[data-view="${viewName}"]`);
-        if (activeNav) activeNav.classList.add('active');
-        // Update page title
-        const titles = {
-            'adminDashboard': 'Dashboard',
-            'adminUsers': 'User Management',
-            'adminServices': 'Services Overview',
-            'labTests': 'Lab Test Management',
-            'rxStatus': 'Rx Service Status',
-            'consultant': 'Service Availability',
-        };
-        document.getElementById('pageTitleMobile').textContent = titles[viewName] || 'Dashboard';
-        // Close mobile sidebar after nav
-        if (window.innerWidth < 1024) {
-            document.getElementById('sidebar').classList.add('sidebar-mobile-hidden');
-            document.getElementById('sidebarOverlay').classList.add('hidden');
-        }
-        // Render the view
-        renderView(viewName);
-    }
-
-    function renderView(viewName) {
-        const db = getDB();
-        switch (viewName) {
-            case 'adminDashboard':
-                renderAdminDashboard(db);
-                break;
-            case 'adminUsers':
-                renderAdminUsers(db);
-                break;
-            case 'adminServices':
-                renderAdminServices(db);
-                break;
-            case 'labTests':
-                renderLabTests(db);
-                break;
-            case 'rxStatus':
-                renderRxStatus(db);
-                break;
-            case 'consultant':
-                renderConsultant(db);
-                break;
-        }
-    }
-
-    // ==================== RENDER FUNCTIONS ====================
-
-    function renderAdminDashboard(db) {
-        const container = document.getElementById('viewAdminDashboard');
-        const totalUsers = db.users.length;
-        const totalTests = db.labTests.length;
-        const activeTests = db.labTests.filter(t => t.isActive).length;
-        const rxWorking = db.rxService.isWorking;
-        const adminCount = db.users.filter(u => u.role === 'admin').length;
-        const labCount = db.users.filter(u => u.role === 'lab').length;
-        const rxCount = db.users.filter(u => u.role === 'rx').length;
-        const consultantCount = db.users.filter(u => u.role === 'consultant').length;
-
-        container.innerHTML = `
-        <div class="mb-6">
-        <h2 class="text-2xl font-bold text-slate-800">Admin Dashboard</h2>
-        <p class="text-slate-500 text-sm mt-1">Overview of all platform activities</p>
-        </div>
-        <!-- Stat Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="card stat-card p-5" style="border-left-color: #0ea5e9;">
-        <div class="flex items-center justify-between">
-        <div>
-        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Total Users</p>
-        <p class="text-3xl font-bold text-slate-800 mt-1">${totalUsers}</p>
-        </div>
-        <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" /></svg>
-        </div>
-        </div>
-        </div>
-        <div class="card stat-card p-5" style="border-left-color: #10b981;">
-        <div class="flex items-center justify-between">
-        <div>
-        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Active Tests</p>
-        <p class="text-3xl font-bold text-slate-800 mt-1">${activeTests}<span class="text-sm text-slate-400 font-normal">/${totalTests}</span></p>
-        </div>
-        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-        <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        </div>
-        </div>
-        </div>
-        <div class="card stat-card p-5" style="border-left-color: ${rxWorking ? '#10b981' : '#ef4444'};">
-        <div class="flex items-center justify-between">
-        <div>
-        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Rx Service</p>
-        <p class="text-3xl font-bold mt-1 ${rxWorking ? 'text-emerald-600' : 'text-red-500'}">${rxWorking ? 'Active' : 'Down'}</p>
-        </div>
-        <div class="w-12 h-12 ${rxWorking ? 'bg-emerald-100' : 'bg-red-100'} rounded-xl flex items-center justify-center">
-        <span class="pulse-dot ${rxWorking ? 'active' : 'inactive'}"></span>
-        </div>
-        </div>
-        </div>
-        <div class="card stat-card p-5" style="border-left-color: #8b5cf6;">
-        <div class="flex items-center justify-between">
-        <div>
-        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Total Services</p>
-        <p class="text-3xl font-bold text-slate-800 mt-1">${totalTests + 1}</p>
-        </div>
-        <div class="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center">
-        <svg class="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-        </div>
-        </div>
-        </div>
-        </div>
-        <!-- User Distribution & Activity -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="card p-6">
-        <h3 class="font-bold text-slate-800 mb-4">User Role Distribution</h3>
-        <div class="space-y-4">
-        ${[
-        {role:'Admin',count:adminCount,color:'bg-primary-500',pct:(adminCount/totalUsers*100).toFixed(0)},
-        {role:'Lab',count:labCount,color:'bg-emerald-500',pct:(labCount/totalUsers*100).toFixed(0)},
-        {role:'Rx',count:rxCount,color:'bg-amber-500',pct:(rxCount/totalUsers*100).toFixed(0)},
-        {role:'Consultant',count:consultantCount,color:'bg-violet-500',pct:(consultantCount/totalUsers*100).toFixed(0)},
-        ].map(r=>`
-        <div>
-        <div class="flex justify-between text-sm mb-1"><span class="font-medium text-slate-700">${r.role}</span><span class="text-slate-500">${r.count} user${r.count!==1?'s':''}</span></div>
-        <div class="w-full bg-slate-200 rounded-full h-2.5"><div class="${r.color} h-2.5 rounded-full transition-all duration-500" style="width:${r.pct}%"></div></div>
-        </div>
-        `).join('')}
-        </div>
-        </div>
-        <div class="card p-6">
-        <h3 class="font-bold text-slate-800 mb-4">Recent Activity</h3>
-        <div class="space-y-3 max-h-64 overflow-y-auto">
-        ${db.activityLogs.slice(-8).reverse().map(log=>`
-        <div class="flex gap-3 items-start pb-3 border-b border-slate-100 last:border-0">
-        <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        </div>
-        <div>
-        <p class="text-sm font-medium text-slate-700">${log.action}</p>
-        <p class="text-xs text-slate-400">${log.details} · ${log.createdAt}</p>
-        </div>
-        </div>
-        `).join('')}
-        ${db.activityLogs.length===0?'<p class="text-slate-400 text-sm text-center py-6">No activity yet</p>':''}
-        </div>
-        </div>
-        </div>
-        `;
-    }
-
-    function renderAdminUsers(db) {
-        const container = document.getElementById('viewAdminUsers');
-        container.innerHTML = `
-        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div>
-        <h2 class="text-2xl font-bold text-slate-800">User Management</h2>
-        <p class="text-slate-500 text-sm mt-1">Manage all platform users</p>
-        </div>
-        <button onclick="openAddUserModal()" class="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold text-sm transition-all shadow-md shadow-primary-500/20 active:scale-[0.97] flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-        Add User
-        </button>
-        </div>
-        <div class="card overflow-hidden">
-        <div class="responsive-table">
-        <table class="w-full text-sm">
-        <thead class="bg-slate-50 border-b border-slate-200">
-        <tr>
-        <th class="text-left p-4 font-semibold text-slate-600">Name</th>
-        <th class="text-left p-4 font-semibold text-slate-600">Email</th>
-        <th class="text-left p-4 font-semibold text-slate-600">Role</th>
-        <th class="text-left p-4 font-semibold text-slate-600">Created</th>
-        <th class="text-right p-4 font-semibold text-slate-600">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        ${db.users.map(u=>`
-        <tr class="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-        <td class="p-4 font-medium text-slate-800">${u.name}</td>
-        <td class="p-4 text-slate-500">${u.email}</td>
-        <td class="p-4"><span class="badge-role ${u.role==='admin'?'bg-purple-100 text-purple-700':u.role==='lab'?'bg-emerald-100 text-emerald-700':u.role==='rx'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}">${u.role}</span></td>
-        <td class="p-4 text-slate-400">${u.createdAt}</td>
-        <td class="p-4 text-right">
-        <button onclick="openEditUserModal('${u.id}')" class="text-primary-600 hover:text-primary-800 font-medium text-xs mr-3 transition-colors">Edit</button>
-        <button onclick="deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 font-medium text-xs transition-colors">Delete</button>
-        </td>
-        </tr>
-        `).join('')}
-        </tbody>
-        </table>
-        </div>
-        ${db.users.length===0?'<p class="text-center text-slate-400 py-8">No users found</p>':''}
-        </div>
-        `;
-    }
-
-    function renderAdminServices(db) {
-        const container = document.getElementById('viewAdminServices');
-        const activeTests = db.labTests.filter(t => t.isActive).length;
-        const totalTests = db.labTests.length;
-        container.innerHTML = `
-        <div class="mb-6">
-        <h2 class="text-2xl font-bold text-slate-800">Services Overview</h2>
-        <p class="text-slate-500 text-sm mt-1">Monitor all lab tests and Rx service</p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div class="card p-6">
-        <h3 class="font-bold text-slate-800 mb-3">Lab Tests Summary</h3>
-        <div class="flex gap-4 mb-4">
-        <div class="flex-1 bg-emerald-50 rounded-xl p-4 text-center">
-        <p class="text-3xl font-bold text-emerald-600">${activeTests}</p>
-        <p class="text-xs text-emerald-700 font-medium">Active</p>
-        </div>
-        <div class="flex-1 bg-red-50 rounded-xl p-4 text-center">
-        <p class="text-3xl font-bold text-red-500">${totalTests-activeTests}</p>
-        <p class="text-xs text-red-700 font-medium">Inactive</p>
-        </div>
-        </div>
-        </div>
-        <div class="card p-6">
-        <h3 class="font-bold text-slate-800 mb-3">Rx Service</h3>
-        <div class="flex items-center gap-4">
-        <span class="pulse-dot ${db.rxService.isWorking?'active':'inactive'}"></span>
-        <span class="text-lg font-bold ${db.rxService.isWorking?'text-emerald-600':'text-red-500'}">${db.rxService.isWorking?'Currently Working':'Not Working'}</span>
-        </div>
-        <p class="text-xs text-slate-400 mt-2">Last updated: ${db.rxService.updatedAt}</p>
-        </div>
-        </div>
-        <div class="card overflow-hidden">
-        <h3 class="font-bold text-slate-800 p-5 pb-3">All Lab Tests</h3>
-        <div class="responsive-table">
-        <table class="w-full text-sm">
-        <thead class="bg-slate-50 border-b border-slate-200">
-        <tr><th class="text-left p-4 font-semibold text-slate-600">Test Name</th><th class="text-left p-4 font-semibold text-slate-600">Category</th><th class="text-left p-4 font-semibold text-slate-600">Status</th></tr>
-        </thead>
-        <tbody>
-        ${db.labTests.map(t=>`
-        <tr class="border-b border-slate-100">
-        <td class="p-4 font-medium text-slate-800">${t.name}</td>
-        <td class="p-4 text-slate-500">${t.category}</td>
-        <td class="p-4"><span class="${t.isActive?'text-emerald-600 bg-emerald-50':'text-red-500 bg-red-50'} px-3 py-1 rounded-full text-xs font-semibold">${t.isActive?'Active':'Inactive'}</span></td>
-        </tr>
-        `).join('')}
-        </tbody>
-        </table>
-        </div>
-        </div>
-        `;
-    }
-
-    function renderLabTests(db) {
-        const container = document.getElementById('viewLabTests');
-        const myTests = db.labTests;
-        container.innerHTML = `
-        <div class="mb-6">
-        <h2 class="text-2xl font-bold text-slate-800">Lab Test Management</h2>
-        <p class="text-slate-500 text-sm mt-1">Toggle tests availability for consultants</p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        ${myTests.map(t=>`
-        <div class="card p-5 ${t.isActive?'border-l-4 border-l-emerald-400':'border-l-4 border-l-red-300'}">
-        <div class="flex items-start justify-between mb-3">
-        <div>
-        <h4 class="font-semibold text-slate-800 text-sm">${t.name}</h4>
-        <span class="text-xs text-slate-400">${t.category}</span>
-        </div>
-        <label class="toggle-switch flex-shrink-0" onclick="event.stopPropagation()">
-        <input type="checkbox" ${t.isActive?'checked':''} onchange="toggleLabTest('${t.id}', this.checked)">
-        <span class="toggle-slider"></span>
-        </label>
-        </div>
-        <p class="text-xs ${t.isActive?'text-emerald-600':'text-red-500'} font-medium">
-        ${t.isActive?'✓ Available for requests':'✕ Not available'}
-        </p>
-        </div>
-        `).join('')}
-        </div>
-        ${myTests.length===0?'<div class="card p-8 text-center text-slate-400">No tests configured yet</div>':''}
-        `;
-    }
-
-    function renderRxStatus(db) {
-        const container = document.getElementById('viewRxStatus');
-        const rx = db.rxService;
-        container.innerHTML = `
-        <div class="mb-6">
-        <h2 class="text-2xl font-bold text-slate-800">Rx Service Status</h2>
-        <p class="text-slate-500 text-sm mt-1">Indicate if the pharmacy service is operational</p>
-        </div>
-        <div class="card p-8 max-w-md mx-auto text-center">
-        <div class="w-20 h-20 ${rx.isWorking?'bg-emerald-100':'bg-red-100'} rounded-full flex items-center justify-center mx-auto mb-5">
-        <span class="pulse-dot ${rx.isWorking?'active':'inactive'}" style="width:24px;height:24px;"></span>
-        </div>
-        <h3 class="text-xl font-bold text-slate-800 mb-2">${rx.isWorking?'Service is Working':'Service is Down'}</h3>
-        <p class="text-slate-500 text-sm mb-6">${rx.isWorking?'Consultants can see that the pharmacy is available for prescriptions.':'Consultants will see that the pharmacy is currently unavailable.'}</p>
-        <label class="toggle-switch mx-auto" style="width:64px;height:34px;">
-        <input type="checkbox" ${rx.isWorking?'checked':''} onchange="toggleRxService(this.checked)">
-        <span class="toggle-slider" style="border-radius:34px;"></span>
-        </label>
-        <p class="text-xs text-slate-400 mt-4">Last updated: ${rx.updatedAt}</p>
-        </div>
-        `;
-    }
-
-    function renderConsultant(db) {
-        const container = document.getElementById('viewConsultant');
-        const activeTests = db.labTests.filter(t => t.isActive);
-        const inactiveTests = db.labTests.filter(t => !t.isActive);
-        const rx = db.rxService;
-        container.innerHTML = `
-        <div class="mb-6">
-        <h2 class="text-2xl font-bold text-slate-800">Service Availability</h2>
-        <p class="text-slate-500 text-sm mt-1">View available lab tests and pharmacy status</p>
-        </div>
-        <!-- Rx Status Banner -->
-        <div class="card p-5 mb-6 ${rx.isWorking?'bg-emerald-50 border border-emerald-200':'bg-red-50 border border-red-200'}">
-        <div class="flex items-center gap-4">
-        <span class="pulse-dot ${rx.isWorking?'active':'inactive'}"></span>
-        <div>
-        <p class="font-bold ${rx.isWorking?'text-emerald-700':'text-red-700'}">Pharmacy Service: ${rx.isWorking?'Operational ✓':'Currently Unavailable ✕'}</p>
-        <p class="text-xs ${rx.isWorking?'text-emerald-600':'text-red-500'}">${rx.isWorking?'You can send prescriptions.':'Please do not send prescriptions at this time.'}</p>
-        </div>
-        </div>
-        </div>
-        <!-- Available Tests -->
-        <div class="mb-6">
-        <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
-        <span class="w-3 h-3 bg-emerald-500 rounded-full"></span> Available Tests (${activeTests.length})
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        ${activeTests.map(t=>`
-        <div class="card p-4 border-l-4 border-l-emerald-400">
-        <p class="font-semibold text-slate-800 text-sm">${t.name}</p>
-        <span class="text-xs text-slate-400">${t.category}</span>
-        </div>
-        `).join('')}
-        ${activeTests.length===0?'<p class="text-slate-400 text-sm col-span-full text-center py-6">No tests currently available</p>':''}
-        </div>
-        </div>
-        <!-- Unavailable Tests -->
-        ${inactiveTests.length>0?`
-        <div>
-        <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
-        <span class="w-3 h-3 bg-red-400 rounded-full"></span> Unavailable Tests (${inactiveTests.length})
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 opacity-60">
-        ${inactiveTests.map(t=>`
-        <div class="card p-4 border-l-4 border-l-red-300 bg-slate-50">
-        <p class="font-semibold text-slate-500 text-sm">${t.name}</p>
-        <span class="text-xs text-slate-400">${t.category} — Not available</span>
-        </div>
-        `).join('')}
-        </div>
-        </div>
-        `:''}
-        <div class="mt-6 text-center">
-        <button onclick="switchView('consultant')" class="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center gap-1 mx-auto transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-        Refresh Status
-        </button>
-        </div>
-        `;
-    }
-
-    // ==================== ACTIONS ====================
-    function toggleLabTest(testId, isActive) {
-        const db = getDB();
-        const test = db.labTests.find(t => t.id === testId);
-        if (!test) return;
-        test.isActive = isActive;
-        test.updatedAt = new Date().toISOString().split('T')[0];
-        db.activityLogs.push({
-            id: 'log' + Date.now(),
-            userId: currentUser.id,
-            action: isActive ? 'Test activated' : 'Test deactivated',
-            details: `"${test.name}" set to ${isActive ? 'active' : 'inactive'}`,
-            createdAt: new Date().toISOString().split('T')[0]
-        });
-        saveDB(db);
-        showToast(`Test "${test.name}" ${isActive ? 'activated' : 'deactivated'}`, isActive ? 'success' : 'warning');
-        renderView(currentView);
-    }
-
-    function toggleRxService(isWorking) {
-        const db = getDB();
-        db.rxService.isWorking = isWorking;
-        db.rxService.updatedAt = new Date().toISOString().split('T')[0];
-        db.activityLogs.push({
-            id: 'log' + Date.now(),
-            userId: currentUser.id,
-            action: isWorking ? 'Rx service activated' : 'Rx service deactivated',
-            details: `Pharmacy service set to ${isWorking ? 'working' : 'not working'}`,
-            createdAt: new Date().toISOString().split('T')[0]
-        });
-        saveDB(db);
-        showToast(`Rx service marked as ${isWorking ? 'working' : 'not working'}`, isWorking ? 'success' : 'error');
-        renderView(currentView);
-    }
-
-    function openAddUserModal() {
-        const bodyHTML = `
-        <div class="space-y-4">
-        <div><label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label><input id="newUserName" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 text-sm" placeholder="Enter name"></div>
-        <div><label class="block text-sm font-medium text-slate-700 mb-1">Email</label><input id="newUserEmail" type="email" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 text-sm" placeholder="Enter email"></div>
-        <div><label class="block text-sm font-medium text-slate-700 mb-1">Password</label><input id="newUserPassword" type="text" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 text-sm" placeholder="Enter password"></div>
-        <div><label class="block text-sm font-medium text-slate-700 mb-1">Role</label><select id="newUserRole" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 text-sm"><option value="admin">Admin</option><option value="lab">Lab</option><option value="rx">Rx</option><option value="consultant">Consultant</option></select></div>
-        </div>
-        `;
-        openModal('Add New User', bodyHTML, () => {
-            const db = getDB();
-            const name = document.getElementById('newUserName').value.trim();
-            const email = document.getElementById('newUserEmail').value.trim();
-            const password = document.getElementById('newUserPassword').value.trim();
-            const role = document.getElementById('newUserRole').value;
-            if (!name || !email || !password) { showToast('Please fill all fields', 'error'); return; }
-            if (db.users.find(u => u.email === email)) { showToast('Email already exists', 'error'); return; }
-            const newUser = { id: 'u' + Date.now(), name, email, password, role, createdAt: new Date()
-                    .toISOString().split('T')[0] };
-            db.users.push(newUser);
-            db.activityLogs.push({ id: 'log' + Date.now(), userId: currentUser.id, action: 'User created',
-                details: `Created user "${name}" (${role})`, createdAt: new Date().toISOString().split('T')[0] });
-            saveDB(db);
-            closeModal();
-            showToast('User created successfully', 'success');
-            renderView('adminUsers');
-        });
-    }
-
-    function openEditUserModal(userId) {
-        const db = getDB();
-        const user = db.users.find(u => u.id === userId);
-        if (!user) return;
-        const bodyHTML = `
-        <div class="space-y-4">
-        <div><label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label><input id="editUserName" value="${user.name}" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 text-sm"></div>
-        <div><label class="block text-sm font-medium text-slate-700 mb-1">Email</label><input id="editUserEmail" type="email" value="${user.email}" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 text-sm"></div>
-        <div><label class="block text-sm font-medium text-slate-700 mb-1">Password</label><input id="editUserPassword" type="text" value="${user.password}" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 text-sm"></div>
-        <div><label class="block text-sm font-medium text-slate-700 mb-1">Role</label><select id="editUserRole" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 text-sm"><option value="admin" ${user.role==='admin'?'selected':''}>Admin</option><option value="lab" ${user.role==='lab'?'selected':''}>Lab</option><option value="rx" ${user.role==='rx'?'selected':''}>Rx</option><option value="consultant" ${user.role==='consultant'?'selected':''}>Consultant</option></select></div>
-        </div>
-        `;
-        openModal('Edit User', bodyHTML, () => {
-            const name = document.getElementById('editUserName').value.trim();
-            const email = document.getElementById('editUserEmail').value.trim();
-            const password = document.getElementById('editUserPassword').value.trim();
-            const role = document.getElementById('editUserRole').value;
-            if (!name || !email || !password) { showToast('Please fill all fields', 'error'); return; }
-            const conflict = db.users.find(u => u.email === email && u.id !== userId);
-            if (conflict) { showToast('Email already in use', 'error'); return; }
-            user.name = name;
-            user.email = email;
-            user.password = password;
-            user.role = role;
-            db.activityLogs.push({ id: 'log' + Date.now(), userId: currentUser.id, action: 'User updated',
-                details: `Updated user "${name}"`, createdAt: new Date().toISOString().split('T')[0] });
-            saveDB(db);
-            closeModal();
-            showToast('User updated successfully', 'success');
-            if (currentUser.id === userId) {
-                currentUser = { ...user };
-                updateSidebarInfo();
-            }
-            renderView('adminUsers');
-        });
-    }
-
-    function deleteUser(userId) {
-        if (!confirm('Are you sure you want to delete this user? This cannot be undone.')) return;
-        const db = getDB();
-        if (userId === currentUser.id) { showToast('You cannot delete your own account', 'error'); return; }
-        const user = db.users.find(u => u.id === userId);
-        if (!user) return;
-        db.users = db.users.filter(u => u.id !== userId);
-        db.activityLogs.push({ id: 'log' + Date.now(), userId: currentUser.id, action: 'User deleted',
-            details: `Deleted user "${user.name}"`, createdAt: new Date().toISOString().split('T')[0] });
-        saveDB(db);
-        showToast('User deleted', 'info');
-        renderView('adminUsers');
-    }
-
-    // ==================== SIDEBAR SETUP ====================
-    function updateSidebarInfo() {
-        if (!currentUser) return;
-        document.getElementById('sidebarUserName').textContent = currentUser.name;
-        document.getElementById('sidebarUserEmail').textContent = currentUser.email;
-        document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
-        document.getElementById('sidebarRole').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser
-            .role.slice(1);
-
-        const nav = document.getElementById('sidebarNav');
-        let navItems = [];
-        switch (currentUser.role) {
-            case 'admin':
-                navItems = [
-                    { view: 'adminDashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1',
-                        label: 'Dashboard' },
-                    { view: 'adminUsers', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z',
-                        label: 'User Management' },
-                    { view: 'adminServices', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
-                        label: 'Services Overview' },
-                ];
-                break;
-            case 'lab':
-                navItems = [
-                    { view: 'labTests', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
-                        label: 'Test Management' },
-                ];
-                break;
-            case 'rx':
-                navItems = [
-                    { view: 'rxStatus', icon: 'M13 10V3L4 14h7v7l9-11h-7z', label: 'Rx Service Status' },
-                ];
-                break;
-            case 'consultant':
-                navItems = [
-                    { view: 'consultant', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z',
-                        label: 'Availability' },
-                ];
-                break;
-        }
-        nav.innerHTML = navItems.map(item => `
-        <div class="nav-item flex items-center gap-3 px-4 py-3 text-slate-300 text-sm" data-view="${item.view}" onclick="switchView('${item.view}')">
-        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="${item.icon}" /></svg>
-        <span>${item.label}</span>
-        </div>
-        `).join('');
-    }
-
-    function getDefaultView() {
-        switch (currentUser.role) {
-            case 'admin':
-                return 'adminDashboard';
-            case 'lab':
-                return 'labTests';
-            case 'rx':
-                return 'rxStatus';
-            case 'consultant':
-                return 'consultant';
-            default:
-                return 'consultant';
-        }
-    }
-
-    // ==================== INITIALIZATION ====================
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value.trim();
-        const user = login(email, password);
-        if (!user) {
-            showToast('Invalid email or password', 'error');
-            return;
-        }
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('appContainer').classList.remove('hidden');
-        updateSidebarInfo();
-        const defaultView = getDefaultView();
-        switchView(defaultView);
-        showToast(`Welcome back, ${user.name}!`, 'success');
-    });
-
-    document.getElementById('logoutBtn').addEventListener('click', logout);
-    document.getElementById('modalOverlay').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
-    document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
-
-    // Keyboard shortcut to close modals
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeModal();
-            if (window.innerWidth < 1024) {
-                document.getElementById('sidebar').classList.add('sidebar-mobile-hidden');
-                document.getElementById('sidebarOverlay').classList.add('hidden');
-            }
-        }
-    });
-
-    // Initialize DB on load
-    getDB();
-    console.log('LabPlatform initialized. D1-compatible localStorage ready.');
-    console.log('Demo credentials available on login screen.');
-</script>
+    <!-- Script principal -->
+    <script src="script.js"></script>
 </body>
 </html>
